@@ -75,9 +75,7 @@ public class DependencyExtractorServiceImpl {
     }
 
     private Map<String, String> extractProperties(Model model) {
-        Map<String, String> properties = new HashMap<>();
         // Extract properties from the model
-        model.getProperties().forEach((key, value) -> properties.put(key, value));
-        return properties;
+        return new HashMap<>(model.getProperties());
     }
 }

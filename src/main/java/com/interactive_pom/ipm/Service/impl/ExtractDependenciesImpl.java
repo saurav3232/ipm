@@ -48,7 +48,6 @@ public class ExtractDependenciesImpl implements ExtractDependencies {
             return dependencyExtract;
 
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
