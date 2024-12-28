@@ -17,9 +17,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.*;
 
-import static com.interactive_pom.ipm.Constants.CommonConstants.INPUT_PATH;
-import static com.interactive_pom.ipm.Constants.CommonConstants.OUTPUT_PATH;
-
 @Component
 @RequiredArgsConstructor
 public class DependencyExtractorServiceImpl {
@@ -28,12 +25,12 @@ public class DependencyExtractorServiceImpl {
     private final ExtractPluginsImpl extractPluginsService;
     private final ExtractDependencyManagementImpl extractDependencyManagementService;
 
-    public void extractAllDependencies() throws FileNotFoundException, XMLStreamException {
+    public void extractAllDependencies(String inputPath, String outputPath) throws FileNotFoundException, XMLStreamException {
 
         MavenStaxReader reader = new MavenStaxReader();
-        Model model = reader.read(new FileReader(INPUT_PATH));
+        Model model = reader.read(new FileReader(inputPath));
         Map<String, String> properties = extractProperties(model);
-        DependencyExtract dependencyExtract = extractDependenciesService.extractDependencies(INPUT_PATH, OUTPUT_PATH, properties);
+        DependencyExtract dependencyExtract = extractDependenciesService.extractDependencies(inputPath, outputPath, properties);
         List<Plugins> pluginsList = extractPluginsService.extractPlugins(model, properties);
         DependencyManagementPom dependencyManagementPom = extractDependencyManagementService.extractDependencyManagement(model, properties);
 
