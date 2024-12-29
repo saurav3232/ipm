@@ -58,7 +58,7 @@ public class ExtractDependenciesImpl implements ExtractDependencies {
             if (Objects.nonNull(dependencyExtract) && Objects.nonNull(dependencyExtract.getChildren())) {
                 setVersionFromPropertyPom(properties, dependencyExtract.getChildren());
             }
-            return new DependencyExtract();
+            return dependencyExtract;
 
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);

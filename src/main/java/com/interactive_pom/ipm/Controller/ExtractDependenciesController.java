@@ -1,5 +1,6 @@
 package com.interactive_pom.ipm.Controller;
 
+import com.interactive_pom.ipm.Model.PomDependencies;
 import com.interactive_pom.ipm.Service.DependencyExtractorServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class ExtractDependenciesController {
     private final DependencyExtractorServiceImpl dependencyExtractorService;
 
     @PostMapping("/extract-pom-dependencies")
-    public ResponseEntity<String> extractPomDependencies(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> extractPomDependencies(@RequestParam("file") MultipartFile file) {
         try {
             // Get the original file name and generate a unique name for the new file
             String originalFileName = file.getOriginalFilename() == null? "pom.xml": file.getOriginalFilename();
@@ -48,9 +49,9 @@ public class ExtractDependenciesController {
             Files.copy(file.getInputStream(), targetLocation);
 
             // Pass the path of the new file to the service
-            dependencyExtractorService.extractAllDependencies(targetLocation.toAbsolutePath().toString(), outputFile.getAbsolutePath());
+            PomDependencies pomDependencies = dependencyExtractorService.extractAllDependencies(targetLocation.toAbsolutePath().toString(), outputFile.getAbsolutePath());
 
-            return ResponseEntity.ok("Dependencies extracted successfully from " + newFileName);
+            return ResponseEntity.ok(pomDependencies);
 
         } catch (IOException e) {
             return ResponseEntity.badRequest().body("Error occurred while storing the file: " + e.getMessage());

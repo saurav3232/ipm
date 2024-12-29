@@ -22,6 +22,9 @@ public class ExtractDependencyManagementImpl implements ExtractDependencyManagem
 
         DependencyManagement dependencyManagement = getDependencyManagementFromPomFile(model);
         DependencyManagementPom dependencyManagementPom = new DependencyManagementPom();
+        if(Objects.isNull(dependencyManagement)){
+            return dependencyManagementPom;
+        }
         dependencyManagementPom.setDependencies(dependencyManagement.getDependencies().stream().map(dependency -> objectMapper.convertValue(dependency, DependencyExtract.class)).toList());
 
         if (Objects.nonNull(dependencyManagementPom.getDependencies())) {

@@ -25,7 +25,7 @@ public class DependencyExtractorServiceImpl {
     private final ExtractPluginsImpl extractPluginsService;
     private final ExtractDependencyManagementImpl extractDependencyManagementService;
 
-    public void extractAllDependencies(String inputPath, String outputPath) throws FileNotFoundException, XMLStreamException {
+    public PomDependencies extractAllDependencies(String inputPath, String outputPath) throws FileNotFoundException, XMLStreamException {
 
         MavenStaxReader reader = new MavenStaxReader();
         Model model = reader.read(new FileReader(inputPath));
@@ -42,6 +42,8 @@ public class DependencyExtractorServiceImpl {
         printDependencies(dependencyExtract.getChildren(), "Direct and transitive dependencies");
         printPlugins(pluginsList);
         printDependencies(dependencyManagementPom.getDependencies(), "Dependency Management");
+
+        return pomDependencies;
     }
 
     private void printDependencies(List<DependencyExtract> dependencies, String tag) {
