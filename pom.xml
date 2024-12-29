@@ -109,6 +109,7 @@
 				<version>${maven.plugin.version}</version>
 			</plugin>
 		</plugins>
+		<finalName>ipm</finalName>
 	</build>
 
 </project>

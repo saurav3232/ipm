@@ -8,9 +8,7 @@ import org.apache.maven.api.model.Model;
 import org.apache.maven.api.model.Plugin;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Component
 public class ExtractPluginsImpl implements ExtractPlugins {
@@ -20,7 +18,9 @@ public class ExtractPluginsImpl implements ExtractPlugins {
     @Override
     public List<Plugins> extractPlugins(Model model, Map<String, String> properties) {
         List<Plugin> pluginList = getPluginDependenciesFromPomFile(model);
-
+        if(Objects.isNull(pluginList) || pluginList.isEmpty()){
+            return new ArrayList<>();
+        }
         return pluginList.stream().map(plugin -> {
             Plugins pluginFromPom = objectMapper.convertValue(plugin, Plugins.class);
             if (Objects.nonNull(pluginFromPom) && Objects.nonNull(pluginFromPom.getDependencies())) {
@@ -32,6 +32,9 @@ public class ExtractPluginsImpl implements ExtractPlugins {
     }
 
     private List<Plugin> getPluginDependenciesFromPomFile(Model model) {
+        if(Objects.isNull(model.getBuild())){
+            return Collections.emptyList();
+        }
         return model.getBuild().getPlugins();
     }
 

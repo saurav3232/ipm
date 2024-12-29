@@ -18,10 +18,23 @@ public class ExtractDependenciesImpl implements ExtractDependencies {
     @Override
     public DependencyExtract extractDependencies(String pomPath, String outputPath, Map<String, String> properties) {
 
-        ProcessBuilder processBuilder = new ProcessBuilder(
-                "cmd.exe", "/c",
-                "mvn -f \"" + pomPath + "\" dependency:tree -DoutputFile=\"" + outputPath + "\" -DoutputType=json"
-        );
+        System.out.println("input path: " + pomPath);
+        System.out.println("output path: " + outputPath);
+
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        System.out.println("OS: " + System.getProperty("os.name").toLowerCase());
+
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            processBuilder.command("cmd.exe", "/c",
+                    "mvn", "-f", pomPath, "dependency:tree",
+                    "-DoutputType=json", "-DoutputFile=" + outputPath);
+        } else {
+            processBuilder.command("mvn", "-f", pomPath, "dependency:tree",
+                    "-DoutputType=json", "-DoutputFile=" + outputPath);
+        }
+
+        System.out.println("Command: " + processBuilder.command());
+
 
         try {
             Process process = processBuilder.start();
