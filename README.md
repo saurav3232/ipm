@@ -3,7 +3,7 @@
 
 This is an in-development backend service for extracting, modifying and upgrading the dependencies from pom.xml of a maven project, both direct and transitive.
 
-### Currently it supports the extraction of dependencies from <dependencies>, <dependencyManagement> and plugins extraction from the <plugins> tag.
+### Currently it supports the extraction of dependencies from `<dependencies>`, `<dependencyManagement>` and plugins extraction from the `<plugins>` tag.
 
 
 
