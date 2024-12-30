@@ -2,6 +2,7 @@ stages:
   - build
   - test
   - build_image
+  - deploy
 
 variables:
   MAVEN_CLI_OPTS: "-B -DskipTests"
@@ -34,15 +35,45 @@ build_image:
       when: always   # Build for any non-main branch
     - when: never    # Default: skip if no conditions match
   script:
-     - if [ "$CI_COMMIT_BRANCH" == "main" ]; then
+    - |
+      mkdir -p image;
+      if [ "$CI_COMMIT_BRANCH" == "main" ]; then
         echo "Building Docker image for main branch...";
-        docker build -t $DOCKER_IMAGE_NAME .;
+        docker build -t "$DOCKER_IMAGE_NAME" .;
+        docker save "$DOCKER_IMAGE_NAME" -o image/main_${CI_PIPELINE_ID}_docker_image.tar;
       else
         echo "Building Docker image for non-main branch...";
-        docker build -t $LOCAL_IMAGE_NAME .;
+        docker build -t "$LOCAL_IMAGE_NAME" .;
+        docker save "$LOCAL_IMAGE_NAME" -o image/${CI_COMMIT_REF_SLUG}_${CI_PIPELINE_ID}_docker_image.tar;
       fi
   artifacts:
     paths:
       - Dockerfile
+      - image/*.tar
     expire_in: 30 days
 
+deploy:
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:dind
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual      # Trigger manually for the main branch
+    - if: '$CI_COMMIT_BRANCH != "main"'
+      when: on_success  # Trigger automatically for non-main branches
+  before_script:
+    - if [ "$CI_COMMIT_BRANCH" == "main" ]; then
+      echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin;
+      fi
+  script:
+    - |
+      if [ "$CI_COMMIT_BRANCH" == "main" ]; then
+        echo "Loading and pushing Docker image for main branch...";
+        docker load -i image/main_${CI_PIPELINE_ID}_docker_image.tar;
+        docker push $DOCKER_IMAGE_NAME;
+      else
+        echo "Loading local Docker image for non-main branch...";
+        docker load -i image/${CI_COMMIT_REF_SLUG}_${CI_PIPELINE_ID}_docker_image.tar;
+        echo "Non-main branch: Image not pushed to Docker Hub";
+      fi
