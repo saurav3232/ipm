@@ -36,19 +36,20 @@ build_image:
     - when: never    # Default: skip if no conditions match
   script:
     - |
+      mkdir -p image;
       if [ "$CI_COMMIT_BRANCH" == "main" ]; then
         echo "Building Docker image for main branch...";
         docker build -t "$DOCKER_IMAGE_NAME" .;
-        mkdir image;
-        docker save "$DOCKER_IMAGE_NAME" -o image/docker_image.tar;
+        docker save "$DOCKER_IMAGE_NAME" -o image/main_${CI_PIPELINE_ID}_docker_image.tar;
       else
         echo "Building Docker image for non-main branch...";
         docker build -t "$LOCAL_IMAGE_NAME" .;
+        docker save "$LOCAL_IMAGE_NAME" -o image/${CI_COMMIT_REF_SLUG}_${CI_PIPELINE_ID}_docker_image.tar;
       fi
   artifacts:
     paths:
       - Dockerfile
-      - image/docker_image.tar
+      - image/*.tar
     expire_in: 30 days
 
 deploy:
@@ -69,10 +70,10 @@ deploy:
     - |
       if [ "$CI_COMMIT_BRANCH" == "main" ]; then
         echo "Loading and pushing Docker image for main branch...";
-        docker load -i image/docker_image.tar;
+        docker load -i image/main_${CI_PIPELINE_ID}_docker_image.tar;
         docker push $DOCKER_IMAGE_NAME;
       else
+        echo "Loading local Docker image for non-main branch...";
+        docker load -i image/${CI_COMMIT_REF_SLUG}_${CI_PIPELINE_ID}_docker_image.tar;
         echo "Non-main branch: Image not pushed to Docker Hub";
       fi
-
-
