@@ -1,0 +1,14 @@
+stages:
+  - build
+
+variables:
+  MAVEN_CLI_OPTS: "-B -DskipTests"
+
+build:
+  stage: build
+  image: maven:3.8.6-jdk-17
+  script:
+    - mvn $MAVEN_CLI_OPTS clean package
+  artifacts:
+    paths:
+      - target/*.jar
