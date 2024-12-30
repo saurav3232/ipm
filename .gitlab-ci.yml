@@ -19,6 +19,9 @@ build_image:
     - if: '$CI_COMMIT_BRANCH != "main"'
       when: always   # Build for any non-main branch
     - when: never    # Default: skip if no conditions match
+  script:
+    - echo "DOCKER_IMAGE_NAME:${DOCKER_IMAGE_NAME}"
+    - echo "LOCAL_IMAGE_NAME:${LOCAL_IMAGE_NAME}"
   artifacts:
     paths:
       - Dockerfile
