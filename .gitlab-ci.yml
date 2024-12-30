@@ -1,5 +1,6 @@
 stages:
   - build
+  - test
 
 variables:
   MAVEN_CLI_OPTS: "-B -DskipTests"
@@ -12,3 +13,10 @@ build:
   artifacts:
     paths:
       - target/*.jar
+    expire_in: 30 days
+
+test:
+  stage: test
+  image: maven:3.9-eclipse-temurin-17
+  script:
+    - mvn test
