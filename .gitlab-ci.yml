@@ -1,8 +1,9 @@
 stages:
   - build
   - test
-  - build_image
+  - create_image
   - deploy
+  - health_check
 
 variables:
   MAVEN_CLI_OPTS: "-B -DskipTests"
@@ -23,8 +24,8 @@ test:
   script:
     - mvn test
 
-build_image:
-  stage: build_image
+create_image:
+  stage: create_image
   image: docker:latest
   services:
     - docker:dind
@@ -77,3 +78,44 @@ deploy:
         docker load -i image/${CI_COMMIT_REF_SLUG}_${CI_PIPELINE_ID}_docker_image.tar;
         echo "Non-main branch: Image not pushed to Docker Hub";
       fi
+
+# Health Check Stage
+health_check:
+  stage: health_check
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - |
+      # Load the image based on the branch
+      if [ "$CI_COMMIT_BRANCH" == "main" ]; then
+        echo "Loading Docker image for main branch...";
+        docker pull "$DOCKER_IMAGE_NAME";
+        IMAGE_NAME="$DOCKER_IMAGE_NAME";
+      else
+        echo "Loading Docker image for non-main branch...";
+        docker load -i image/${CI_COMMIT_REF_SLUG}_${CI_PIPELINE_ID}_docker_image.tar;
+        IMAGE_NAME=${CI_COMMIT_REF_SLUG}_${CI_PIPELINE_ID}_docker_image.tar;
+      fi
+
+      # Run the image in a container and wait for it to be healthy
+      echo "Starting Docker container for health check...";
+      docker run -d --name health_check_container -p 8080:8080 $IMAGE_NAME;
+      sleep 10;
+
+      # Check health endpoint
+      echo "Checking health endpoint...";
+      HEALTH_STATUS=$(curl --silent --max-time 30 http://localhost:8080/actuator/health_check)
+
+      # Print health status
+      echo "Health check response: $HEALTH_STATUS";
+
+      # Fail the job if health check doesn't pass (i.e., non-200 response)
+      if [[ "$HEALTH_STATUS" != *"UP"* ]]; then
+        echo "Health check failed!";
+        exit 1;
+      fi
+
+      # Clean up by stopping and removing the container
+      docker stop health_check_container;
+      docker rm health_check_container;
