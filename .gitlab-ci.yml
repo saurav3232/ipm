@@ -6,7 +6,7 @@ variables:
 
 build:
   stage: build
-  image: maven:3.8.6-jdk-17
+  image: maven:3.9-eclipse-temurin-17
   script:
     - mvn $MAVEN_CLI_OPTS clean package
   artifacts:
