@@ -2,6 +2,7 @@ stages:
   - build
   - test
   - build_image
+  - deploy
 
 variables:
   MAVEN_CLI_OPTS: "-B -DskipTests"
@@ -46,4 +47,27 @@ build_image:
     paths:
       - Dockerfile
     expire_in: 30 days
+
+deploy:
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:dind
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual      # Trigger manually for the main branch
+    - if: '$CI_COMMIT_BRANCH != "main"'
+      when: on_success  # Trigger automatically for non-main branches
+  before_script:
+    - if [ "$CI_COMMIT_BRANCH" == "main" ]; then
+        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin;
+      fi
+  script:
+    - |
+      if [ "$CI_COMMIT_BRANCH" == "main" ]; then
+        docker push $IMAGE_NAME;
+      else
+        echo "Non-main branch: Image not pushed to Docker Hub";
+      fi
+
 
