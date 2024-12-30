@@ -39,6 +39,8 @@ build_image:
       if [ "$CI_COMMIT_BRANCH" == "main" ]; then
         echo "Building Docker image for main branch...";
         docker build -t "$DOCKER_IMAGE_NAME" .;
+        mkdir image;
+        docker save "$DOCKER_IMAGE_NAME" -o image/docker_image.tar;
       else
         echo "Building Docker image for non-main branch...";
         docker build -t "$LOCAL_IMAGE_NAME" .;
@@ -46,6 +48,7 @@ build_image:
   artifacts:
     paths:
       - Dockerfile
+      - image/docker_image.tar
     expire_in: 30 days
 
 deploy:
@@ -65,6 +68,8 @@ deploy:
   script:
     - |
       if [ "$CI_COMMIT_BRANCH" == "main" ]; then
+        echo "Loading and pushing Docker image for main branch...";
+        docker load -i image/docker_image.tar;
         docker push $DOCKER_IMAGE_NAME;
       else
         echo "Non-main branch: Image not pushed to Docker Hub";
