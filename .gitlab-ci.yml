@@ -1,6 +1,7 @@
 stages:
   - build
   - test
+  - build_image
 
 variables:
   MAVEN_CLI_OPTS: "-B -DskipTests"
@@ -20,3 +21,28 @@ test:
   image: maven:3.9-eclipse-temurin-17
   script:
     - mvn test
+
+build_image:
+  stage: build_image
+  image: docker:latest
+  services:
+    - docker:dind
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always   # Always build for the main branch
+    - if: '$CI_COMMIT_BRANCH != "main"'
+      when: always   # Build for any non-main branch
+    - when: never    # Default: skip if no conditions match
+  script:
+     - if [ "$CI_COMMIT_BRANCH" == "main" ]; then
+        echo "Building Docker image for main branch...";
+        docker build -t $DOCKER_IMAGE_NAME .;
+      else
+        echo "Building Docker image for non-main branch...";
+        docker build -t $LOCAL_IMAGE_NAME .;
+      fi
+  artifacts:
+    paths:
+      - Dockerfile
+    expire_in: 30 days
+
