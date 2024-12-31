@@ -1,0 +1,16 @@
+info:
+  app:
+    name: ipm
+    description: "IPM App"
+    version: 1.0.0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env,beans
+      path-mapping:
+        health: health_check
+  endpoint:
+    health:
+      show-details: always
