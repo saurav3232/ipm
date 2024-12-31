@@ -112,7 +112,7 @@ health_check:
 
       # Perform health check
       echo "Checking health endpoint...";
-      HEALTH_STATUS=$(curl --silent --max-time 30 http://localhost:8080/actuator/health);
+      HEALTH_STATUS=$(docker exec health_check_container curl --silent --max-time 30 http://localhost:8080/actuator/health);
 
       # Print health status
       echo "Health check response: $HEALTH_STATUS";
