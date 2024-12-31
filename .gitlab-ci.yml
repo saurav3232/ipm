@@ -8,6 +8,17 @@ stages:
 variables:
   MAVEN_CLI_OPTS: "-B -DskipTests"
 
+# Workflow to ensure the pipeline runs for all MR events and branch commits
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always  # Run pipeline for merge requests
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always  # Run pipeline for the main branch
+    - if: '$CI_COMMIT_BRANCH != "main"'
+      when: always  # Run pipeline for all other branches
+    - when: never  # Default: skip pipeline if no conditions match
+
 build:
   stage: build
   image: maven:3.9-eclipse-temurin-17
@@ -17,12 +28,23 @@ build:
     paths:
       - target/*.jar
     expire_in: 1 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH'
+      when: always
+
 
 test:
   stage: test
   image: maven:3.9-eclipse-temurin-17
   script:
     - mvn test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH'
+      when: on_success
 
 create_image:
   stage: create_image
@@ -30,11 +52,12 @@ create_image:
   services:
     - docker:dind
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
     - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always   # Always build for the main branch
+      when: on_success
     - if: '$CI_COMMIT_BRANCH != "main"'
-      when: always   # Build for any non-main branch
-    - when: never    # Default: skip if no conditions match
+      when: on_success
   script:
     - |
       mkdir -p image;
@@ -59,10 +82,12 @@ deploy:
   services:
     - docker:dind
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: on_success
     - if: '$CI_COMMIT_BRANCH == "main"'
-      when: manual      # Trigger manually for the main branch
+      when: manual
     - if: '$CI_COMMIT_BRANCH != "main"'
-      when: on_success  # Trigger automatically for non-main branches
+      when: on_success
   before_script:
     - if [ "$CI_COMMIT_BRANCH" == "main" ]; then
       echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin;
@@ -85,6 +110,14 @@ health_check:
   image: docker:latest
   services:
     - docker:dind
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH != "main"'
+      when: on_success
+    - when: never # Default rule to prevent running if no conditions match
   script:
     - apk add --no-cache curl
     - |
