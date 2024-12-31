@@ -73,11 +73,15 @@ git clone https://github.com/saurav3232/ipm.git
 ```bash
 cd ipm
 ```
-3) Build the docker image:
+3) Create jar file of the project.
+```bash
+mvn clean package
+```
+4) Build the docker image:
 ```bash
 docker build -t ipm .
 ```
-4) Run the image in the container: 
+5) Run the image in the container: 
 ```bash
 docker run -p 8080:8080 ipm 
 ```
@@ -86,6 +90,16 @@ Now you can use the api.
 #### Imp point: If you are using a custom repository source for maven, then you need to add the settings.xml file in the project folder and uncomment the following line from the dockerfile:
 ```bash
 COPY settings.xml /root/.m2/settings.xml
+```
+#### Another point to note if you don't have maven installed in your system then uncomment and comment the following lines in Dockerfile respectively:
+```
+RUN mvn clean package
+CMD ["java", "-jar", "target/ipm.jar"]
+```
+
+```
+COPY target/ipm.jar .
+CMD ["java", "-jar", "ipm.jar"]
 ```
 
 
