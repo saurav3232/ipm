@@ -86,7 +86,7 @@ health_check:
   services:
     - docker:dind
   script:
-    - apk add --no-cache curl  # Install curl
+    - apk add --no-cache curl
     - |
       # Load the image based on the branch
       if [ "$CI_COMMIT_BRANCH" == "main" ]; then
@@ -99,24 +99,30 @@ health_check:
         IMAGE_NAME="$LOCAL_IMAGE_NAME";
       fi
 
-      # Run the image in a container and wait for it to be healthy
+      # Start the container
       echo "Starting Docker container for health check...";
       docker run -d --name health_check_container -p 8080:8080 $IMAGE_NAME;
-      sleep 10;
 
-      # # Check health endpoint
+      # Allow time for the container to initialize
+      sleep 20;
+
+      # Check container logs (debugging step)
+      echo "Container logs:";
+      docker logs health_check_container;
+
+      # Perform health check
       echo "Checking health endpoint...";
-      HEALTH_STATUS=$(curl --silent --max-time 30 http://localhost:8080/actuator/health_check)
+      HEALTH_STATUS=$(curl --silent --max-time 30 http://localhost:8080/actuator/health);
 
-      # # Print health status
+      # Print health status
       echo "Health check response: $HEALTH_STATUS";
 
-      # # Fail the job if health check doesn't pass (i.e., non-200 response)
+      # Fail the job if health check doesn't pass
       if [[ "$HEALTH_STATUS" != *"UP"* ]]; then
         echo "Health check failed!";
         exit 1;
       fi
 
-      # # Clean up by stopping and removing the container
+      # Clean up
       docker stop health_check_container;
       docker rm health_check_container;
