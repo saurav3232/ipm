@@ -16,7 +16,7 @@ build:
   artifacts:
     paths:
       - target/*.jar
-    expire_in: 30 days
+    expire_in: 1 days
 
 test:
   stage: test
@@ -51,7 +51,7 @@ create_image:
     paths:
       - Dockerfile
       - image/*.tar
-    expire_in: 30 days
+    expire_in: 1 days
 
 deploy:
   stage: deploy
@@ -86,6 +86,7 @@ health_check:
   services:
     - docker:dind
   script:
+    - apk add --no-cache curl  # Install curl
     - |
       # Load the image based on the branch
       if [ "$CI_COMMIT_BRANCH" == "main" ]; then
