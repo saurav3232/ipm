@@ -1,5 +1,6 @@
 package com.interactive_pom.ipm.Utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.*;
 
@@ -13,6 +14,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 
 @Component
+@Slf4j
 public class PomCleanserService {
 
     public void cleanPom(File inputFile) {
@@ -41,7 +43,8 @@ public class PomCleanserService {
 
             System.out.println("Empty tags and comments removed successfully!");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error while cleaning the pom.xml {}",e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 

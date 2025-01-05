@@ -7,7 +7,6 @@ import org.apache.maven.api.model.Model;
 import org.apache.maven.api.model.Plugin;
 import org.apache.maven.api.xml.XmlNode;
 import org.apache.maven.internal.xml.XmlNodeBuilder;
-import org.apache.maven.model.v4.MavenStaxReader;
 import org.apache.maven.model.v4.MavenStaxWriter;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.springframework.stereotype.Component;
