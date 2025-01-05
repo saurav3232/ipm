@@ -1,7 +1,7 @@
 package com.interactive_pom.ipm.Controller;
 
 import com.interactive_pom.ipm.Model.PomDependencies;
-import com.interactive_pom.ipm.Service.DependencyExtractorServiceImpl;
+import com.interactive_pom.ipm.Service.impl.DependencyExtractorServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

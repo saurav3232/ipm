@@ -1,12 +1,9 @@
-package com.interactive_pom.ipm.Service;
+package com.interactive_pom.ipm.Service.impl;
 
 import com.interactive_pom.ipm.Model.DependencyExtract;
 import com.interactive_pom.ipm.Model.DependencyManagementPom;
 import com.interactive_pom.ipm.Model.Plugins;
 import com.interactive_pom.ipm.Model.PomDependencies;
-import com.interactive_pom.ipm.Service.impl.ExtractDependenciesImpl;
-import com.interactive_pom.ipm.Service.impl.ExtractDependencyManagementImpl;
-import com.interactive_pom.ipm.Service.impl.ExtractPluginsImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.maven.api.model.Model;
 import org.apache.maven.model.v4.MavenStaxReader;
