@@ -20,8 +20,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ModifyOssPluginToPomServiceImpl implements ModifyOSSPlugin {
 
-    private static final String ossConfigurationXml = "<configuration><fail>false</fail><transitive>true</transitive><reportFile>../vulnerability-reports/${project.artifactId}-report.json</reportFile></configuration>";
-
     private final PomCleanserService pomCleanserService;
 
     @Override
