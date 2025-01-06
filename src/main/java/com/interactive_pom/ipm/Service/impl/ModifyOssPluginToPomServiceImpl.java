@@ -28,7 +28,7 @@ public class ModifyOssPluginToPomServiceImpl implements ModifyOSSPlugin {
     public void addOssPluginConfig(Model model, File pomFile) throws XMLStreamException, IOException, XmlPullParserException {
 
         List<Plugin> newPluginList = new ArrayList<>(model.getBuild().getPlugins());
-        newPluginList.add(Plugin.newBuilder().artifactId("ossindex-maven-plugin").groupId("org.sonatype.ossindex.maven").configuration(createConfigurationNode()).build());
+        newPluginList.add(Plugin.newBuilder().artifactId("ossindex-maven-plugin").groupId("org.sonatype.ossindex.maven").configuration(createConfigurationNode(pomFile.getName())).build());
         Model modifiedModel = model.withBuild(model.getBuild().withPlugins(newPluginList));
 
         try (FileWriter writer = new FileWriter(pomFile)) {
@@ -58,7 +58,11 @@ public class ModifyOssPluginToPomServiceImpl implements ModifyOSSPlugin {
         System.out.println("OSS plugin removed successfully from pom.xml");
     }
 
-    private XmlNode createConfigurationNode() throws IOException, XmlPullParserException {
-        return XmlNodeBuilder.build(new StringReader(ossConfigurationXml));
+    private String generateConfigurationString(String pomPath){
+        return "<configuration><fail>false</fail><transitive>true</transitive><reportFile>../vulnerability-reports/"+pomPath+"-report.json</reportFile></configuration>";
+    }
+
+    private XmlNode createConfigurationNode(String fileName) throws IOException, XmlPullParserException {
+        return XmlNodeBuilder.build(new StringReader(generateConfigurationString(fileName.replace("_pom.xml", ""))));
     }
 }
